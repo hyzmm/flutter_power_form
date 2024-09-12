@@ -10,6 +10,7 @@ class PowerForm extends StatefulWidget {
   final Map<String, Object>? initialValues;
   final ValidateMode validateMode;
   final void Function(String fieldName, Object value)? onChanged;
+  final VoidCallback? onReset;
   final Widget Function(String? error)? errorWidget;
 
   const PowerForm({
@@ -17,6 +18,7 @@ class PowerForm extends StatefulWidget {
     this.initialValues,
     required this.child,
     this.onChanged,
+    this.onReset,
     this.validateMode = ValidateMode.manual,
     this.errorWidget = defaultErrorWidget,
   });
@@ -123,6 +125,16 @@ class PowerFormState extends State<PowerForm> {
     resetValues.clear();
     resetValues.addAll(values);
     _dataChanged.add(false);
+  }
+
+  void reset() {
+    values.clear();
+    values.addAll(resetValues);
+    _dataChanged.add(false);
+    for (final formItemState in formItemStates.values) {
+      formItemState.rebuild();
+    }
+    widget.onReset?.call();
   }
 }
 

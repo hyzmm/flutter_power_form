@@ -90,8 +90,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: const Text("Async Validation"),
               ),
               OutlinedButton(
-                onPressed: () => _pushPage(const ReactiveDataChanged()),
-                child: const Text("Reactive dataChanged"),
+                onPressed: () => _pushPage(const ReactiveDataChangedAndReset()),
+                child: const Text("Reactive dataChanged & Reset"),
               ),
             ],
           ),
