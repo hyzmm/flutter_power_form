@@ -24,7 +24,7 @@ class _BasicUsageState extends State<BasicUsage> {
           validateMode: ValidateMode.onChange,
           child: ListView(
             children: [
-              FormItem<String>(
+              PowerFormItem<String>(
                   name: "name",
                   validator:
                       PowerFormFieldValidator.required("Name is required"),
@@ -37,7 +37,7 @@ class _BasicUsageState extends State<BasicUsage> {
                       ),
                     );
                   }),
-              FormItem<Gender>(
+              PowerFormItem<Gender>(
                   name: "gender",
                   builder: (value, onChanged, extra) {
                     return Column(

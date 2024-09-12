@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import '../power_form.dart';
 import 'form.dart';
 
 /// A form item that can be used to build form fields.
-class FormItem<T> extends StatefulWidget {
+class PowerFormItem<T> extends StatefulWidget {
   /// The name of the form item, corresponds to the field name in the data.
   final String name;
   final Widget Function(
@@ -21,7 +23,7 @@ class FormItem<T> extends StatefulWidget {
   /// It can be set to false if the form item contains a self-managed widget, e.g. a TextField.
   final bool rebuildOnChanged;
 
-  const FormItem({
+  const PowerFormItem({
     super.key,
     required this.name,
     this.validator,
@@ -31,10 +33,10 @@ class FormItem<T> extends StatefulWidget {
   });
 
   @override
-  State<FormItem> createState() => FormItemState<T>();
+  State<PowerFormItem> createState() => PowerFormItemState<T>();
 }
 
-class FormItemState<T> extends State<FormItem<T>> {
+class PowerFormItemState<T> extends State<PowerFormItem<T>> {
   @override
   void deactivate() {
     final formContext = FormScope.of(context);
@@ -78,6 +80,10 @@ class FormItemState<T> extends State<FormItem<T>> {
 
   void rebuild() {
     setState(() {});
+  }
+
+  FutureOr<String?>? validate(T? value) {
+    return widget.validator?.call(value);
   }
 }
 

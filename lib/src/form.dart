@@ -31,7 +31,7 @@ class PowerForm extends StatefulWidget {
 class PowerFormState extends State<PowerForm> {
   final Map<String, dynamic> values = {};
   final Map<String, dynamic> resetValues = {};
-  final Map<String, FormItemState> formItemStates = {};
+  final Map<String, PowerFormItemState<dynamic>> formItemStates = {};
   final StreamController<bool> _dataChanged = StreamController.broadcast();
   final _errors = <String, String>{};
 
@@ -75,7 +75,7 @@ class PowerFormState extends State<PowerForm> {
 
       final fieldName = formItemState.widget.name;
       final fieldValue = values[fieldName];
-      switch (formItemState.widget.validator?.call(fieldValue)) {
+      switch (formItemState.validate(fieldValue)) {
         case String message:
           _errors[fieldName] = message;
         case Future<String?> future:
@@ -115,7 +115,7 @@ class PowerFormState extends State<PowerForm> {
     }
   }
 
-  void addFormItemState(FormItemState formItemState) {
+  void addFormItemState(PowerFormItemState formItemState) {
     formItemStates[formItemState.widget.name] = formItemState;
   }
 

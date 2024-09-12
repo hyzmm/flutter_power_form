@@ -3,7 +3,7 @@ import 'dart:async';
 /// Signature for a function that validates a form field.
 /// Returns a string to use as an error message if the input is invalid, or null otherwise.
 typedef PowerFormFieldValidatorCallback<T> = FutureOr<String?> Function(
-    T value);
+    T? value);
 
 /// A utility class that provides common form validators.
 class PowerFormFieldValidator {

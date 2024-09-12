@@ -49,7 +49,7 @@ class _GetFormValuesState extends State<GetFormValues> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                FormItem<String>(
+                PowerFormItem<String>(
                     name: "name",
                     rebuildOnChanged: false,
                     builder: (value, onChanged, extra) {
@@ -63,7 +63,7 @@ class _GetFormValuesState extends State<GetFormValues> {
                         ),
                       );
                     }),
-                FormItem<String>(
+                PowerFormItem<String>(
                     name: "email",
                     builder: (value, onChanged, extra) {
                       emailTextController ??=

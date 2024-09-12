@@ -4,6 +4,7 @@ import 'package:example/reactive_data_changed.dart';
 import 'package:flutter/material.dart';
 
 import 'async_validation.dart';
+import 'built_in_form_validation.dart';
 
 void main() {
   runApp(const MyApp());
@@ -97,6 +98,10 @@ class _MyHomePageState extends State<MyHomePage> {
               OutlinedButton(
                 onPressed: () => _pushPage(const GetFormValues()),
                 child: const Text("Get Form Values"),
+              ),
+              OutlinedButton(
+                onPressed: () => _pushPage(const BuiltInFormValidation()),
+                child: const Text("Built-in Form Validation"),
               ),
             ],
           ),

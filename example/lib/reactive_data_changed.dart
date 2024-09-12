@@ -41,7 +41,7 @@ class _ReactiveDataChangedAndResetState
           child: ListView(
             children: [
               const Text("Submit button will be enabled when data is changed"),
-              FormItem<String>(
+              PowerFormItem<String>(
                   name: "name",
                   validator:
                       PowerFormFieldValidator.required("Name is required"),

@@ -39,7 +39,7 @@ class _AsyncValidationState extends State<AsyncValidation> {
           key: formKey,
           child: ListView(
             children: [
-              FormItem<String>(
+              PowerFormItem<String>(
                   name: "name",
                   validator: PowerFormFieldValidator.compose<String?>([
                     PowerFormFieldValidator.required(
