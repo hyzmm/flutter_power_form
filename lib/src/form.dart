@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:ms_map_utils/ms_map_utils.dart';
 import 'package:power_form/src/form_item.dart';
 
 /// A form widget that holds the state of the form.
@@ -28,8 +29,8 @@ class PowerForm extends StatefulWidget {
 }
 
 class PowerFormState extends State<PowerForm> {
-  final Map<String, Object> values = {};
-  final Map<String, Object> resetValues = {};
+  final Map<String, dynamic> values = {};
+  final Map<String, dynamic> resetValues = {};
   final Map<String, FormItemState> formItemStates = {};
   final StreamController<bool> _dataChanged = StreamController.broadcast();
   final _errors = <String, String>{};
@@ -135,6 +136,10 @@ class PowerFormState extends State<PowerForm> {
       formItemState.rebuild();
     }
     widget.onReset?.call();
+  }
+
+  Map<String, dynamic> getPatchValues() {
+    return diff(resetValues, values).cast();
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:example/basic_usage.dart';
+import 'package:example/get_form_values.dart';
 import 'package:example/reactive_data_changed.dart';
 import 'package:flutter/material.dart';
 
@@ -92,6 +93,10 @@ class _MyHomePageState extends State<MyHomePage> {
               OutlinedButton(
                 onPressed: () => _pushPage(const ReactiveDataChangedAndReset()),
                 child: const Text("Reactive dataChanged & Reset"),
+              ),
+              OutlinedButton(
+                onPressed: () => _pushPage(const GetFormValues()),
+                child: const Text("Get Form Values"),
               ),
             ],
           ),
