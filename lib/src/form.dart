@@ -109,6 +109,7 @@ class PowerFormState extends State<PowerForm> {
     widget.onChanged?.call(fieldName, value);
     _dataChanged
         .add(!const DeepCollectionEquality().equals(values, resetValues));
+    formItemStates[fieldName]?.rebuild();
     if (widget.validateMode == ValidateMode.onChange) {
       validate([fieldName]);
     }

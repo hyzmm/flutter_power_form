@@ -9,8 +9,17 @@ class FormItem<T> extends StatefulWidget {
   final String name;
   final Widget Function(
       T? value, ValueChanged<T> onChanged, FormItemBuilderExtraArgs) builder;
+
+  /// A validator function that can be used to validate the field.
   final PowerFormFieldValidatorCallback<T>? validator;
+
+  /// A widget that can be used to display the error message.
   final Widget Function(String? error)? errorWidget;
+
+  /// If true, the form item will rebuild when the form data is changed.
+  /// Default is true.
+  /// It can be set to false if the form item contains a self-managed widget, e.g. a TextField.
+  final bool rebuildOnChanged;
 
   const FormItem({
     super.key,
@@ -18,6 +27,7 @@ class FormItem<T> extends StatefulWidget {
     this.validator,
     required this.builder,
     this.errorWidget,
+    this.rebuildOnChanged = true,
   });
 
   @override

@@ -21,6 +21,7 @@ class _BasicUsageState extends State<BasicUsage> {
         padding: const EdgeInsets.all(8.0),
         child: PowerForm(
           key: formKey,
+          validateMode: ValidateMode.onChange,
           child: ListView(
             children: [
               FormItem<String>(
@@ -36,7 +37,28 @@ class _BasicUsageState extends State<BasicUsage> {
                       ),
                     );
                   }),
-              FilledButton(onPressed: submit, child: const Text("Submit")),
+              FormItem<Gender>(
+                  name: "gender",
+                  builder: (value, onChanged, extra) {
+                    return Column(
+                      children: [
+                        RadioListTile<Gender>(
+                            value: Gender.male,
+                            groupValue: value,
+                            onChanged: (v) => onChanged(v!),
+                            title: const Text("Male")),
+                        RadioListTile<Gender>(
+                            value: Gender.female,
+                            groupValue: value,
+                            onChanged: (v) => onChanged(v!),
+                            title: const Text("Female")),
+                      ],
+                    );
+                  }),
+              FormDataChanged(
+                  builder: (context, changed, _) => FilledButton(
+                      onPressed: changed ? submit : null,
+                      child: const Text("Submit"))),
             ],
           ),
         ),
@@ -46,6 +68,15 @@ class _BasicUsageState extends State<BasicUsage> {
 
   Future<void> submit() async {
     final formState = formKey.currentState!;
-    if (await formState.validate()) {}
+    if (await formState.validate()) {
+      formState.save();
+      final values = formState.values;
+      print(values);
+    }
   }
+}
+
+enum Gender {
+  male,
+  female,
 }

@@ -51,6 +51,7 @@ class _GetFormValuesState extends State<GetFormValues> {
               children: [
                 FormItem<String>(
                     name: "name",
+                    rebuildOnChanged: false,
                     builder: (value, onChanged, extra) {
                       usernameTextController ??=
                           TextEditingController(text: value);
