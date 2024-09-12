@@ -1,5 +1,8 @@
 import 'package:example/basic_usage.dart';
+import 'package:example/reactive_data_changed.dart';
 import 'package:flutter/material.dart';
+
+import 'async_validation.dart';
 
 void main() {
   runApp(const MyApp());
@@ -79,8 +82,17 @@ class _MyHomePageState extends State<MyHomePage> {
           child: ListView(
             children: [
               OutlinedButton(
-                  onPressed: () => _pushPage(const BasicUsage()),
-                  child: const Text("Basic Usage"))
+                onPressed: () => _pushPage(const BasicUsage()),
+                child: const Text("Basic Usage"),
+              ),
+              OutlinedButton(
+                onPressed: () => _pushPage(const AsyncValidation()),
+                child: const Text("Async Validation"),
+              ),
+              OutlinedButton(
+                onPressed: () => _pushPage(const ReactiveDataChanged()),
+                child: const Text("Reactive dataChanged"),
+              ),
             ],
           ),
         ));

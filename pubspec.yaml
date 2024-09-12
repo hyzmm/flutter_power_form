@@ -8,6 +8,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  collection: ^1.18.0
   flutter:
     sdk: flutter
   ms_map_utils: ^1.1.0

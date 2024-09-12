@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:power_form/power_form.dart';
 
-class BasicUsage extends StatefulWidget {
-  const BasicUsage({super.key});
+class ReactiveDataChanged extends StatefulWidget {
+  const ReactiveDataChanged({super.key});
 
   @override
-  State<BasicUsage> createState() => _BasicUsageState();
+  State<ReactiveDataChanged> createState() => _ReactiveDataChangedState();
 }
 
-class _BasicUsageState extends State<BasicUsage> {
+class _ReactiveDataChangedState extends State<ReactiveDataChanged> {
   final formKey = GlobalKey<PowerFormState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Basic Usage"),
+        title: const Text("Reactive dataChanged"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: PowerForm(
+          initialValues: const {"name": "John"},
           key: formKey,
           child: ListView(
             children: [
+              const Text("Submit button will be enabled when data is changed"),
               FormItem<String>(
                   name: "name",
                   validator:
@@ -36,7 +38,11 @@ class _BasicUsageState extends State<BasicUsage> {
                       ),
                     );
                   }),
-              FilledButton(onPressed: submit, child: const Text("Submit")),
+              FormDataChanged(builder: (context, dataChanged, _) {
+                return FilledButton(
+                    onPressed: dataChanged ? submit : null,
+                    child: const Text("Submit"));
+              }),
             ],
           ),
         ),
@@ -46,6 +52,8 @@ class _BasicUsageState extends State<BasicUsage> {
 
   Future<void> submit() async {
     final formState = formKey.currentState!;
-    if (await formState.validate()) {}
+    if (await formState.validate()) {
+      formState.save();
+    }
   }
 }

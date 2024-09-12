@@ -9,7 +9,7 @@ class FormItem<T> extends StatefulWidget {
   final String name;
   final Widget Function(
       T? value, ValueChanged<T> onChanged, FormItemBuilderExtraArgs) builder;
-  final PowerFormFieldValidator<T>? validator;
+  final PowerFormFieldValidatorCallback<T>? validator;
   final Widget Function(String? error)? errorWidget;
 
   const FormItem({

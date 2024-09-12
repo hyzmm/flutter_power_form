@@ -1,18 +1,23 @@
+import 'dart:async';
+
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:power_form/src/form_item.dart';
 
 /// A form widget that holds the state of the form.
 class PowerForm extends StatefulWidget {
   final Widget child;
+  final Map<String, Object>? initialValues;
   final ValidateMode validateMode;
   final void Function(String fieldName, Object value)? onChanged;
   final Widget Function(String? error)? errorWidget;
 
   const PowerForm({
     super.key,
+    this.initialValues,
     required this.child,
     this.onChanged,
-    this.validateMode = ValidateMode.onChange,
+    this.validateMode = ValidateMode.manual,
     this.errorWidget = defaultErrorWidget,
   });
 
@@ -22,11 +27,33 @@ class PowerForm extends StatefulWidget {
 
 class PowerFormState extends State<PowerForm> {
   final Map<String, Object> values = {};
+  final Map<String, Object> resetValues = {};
   final Map<String, FormItemState> formItemStates = {};
-
+  final StreamController<bool> _dataChanged = StreamController.broadcast();
   final _errors = <String, String>{};
 
+  /// A stream that emits true when the form data is changed(not user interacted).
+  /// This stream can be used to enable/disable the submit button.
+  Stream<bool> get dataChanged => _dataChanged.stream;
+
   String? getError(String fieldName) => _errors[fieldName];
+
+  @override
+  void initState() {
+    resetValues
+      ..clear()
+      ..addAll(widget.initialValues ?? {});
+    values
+      ..clear()
+      ..addAll(resetValues);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _dataChanged.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +62,7 @@ class PowerFormState extends State<PowerForm> {
 
   /// Validates the form
   /// [fields] is a list of field names to validate, if not provided, all fields will be validated.
-  bool validate([List<String>? fields]) {
+  Future<bool> validate([List<String>? fields]) async {
     final oldErrors = Map.from(_errors);
 
     for (final formItemState in formItemStates.values) {
@@ -48,14 +75,13 @@ class PowerFormState extends State<PowerForm> {
       switch (formItemState.widget.validator?.call(fieldValue)) {
         case String message:
           _errors[fieldName] = message;
-        case Future<String?> message:
-          message.then((value) {
-            if (value != null) {
-              _errors[fieldName] = value;
-            } else {
-              _errors.remove(fieldName);
-            }
-          });
+        case Future<String?> future:
+          final value = await future;
+          if (value != null) {
+            _errors[fieldName] = value;
+          } else {
+            _errors.remove(fieldName);
+          }
         case null:
           _errors.remove(fieldName);
       }
@@ -78,6 +104,8 @@ class PowerFormState extends State<PowerForm> {
   void setFieldValue<T>(String fieldName, T value) {
     values[fieldName] = value as Object;
     widget.onChanged?.call(fieldName, value);
+    _dataChanged
+        .add(!const DeepCollectionEquality().equals(values, resetValues));
     if (widget.validateMode == ValidateMode.onChange) {
       validate([fieldName]);
     }
@@ -90,11 +118,17 @@ class PowerFormState extends State<PowerForm> {
   void removeFormItemState(String name) {
     formItemStates.remove(name);
   }
+
+  void save() {
+    resetValues.clear();
+    resetValues.addAll(values);
+    _dataChanged.add(false);
+  }
 }
 
 enum ValidateMode {
-  /// Do not auto validate the form, your app should call [PowerFormState.validate] manually.
-  none,
+  /// Call [PowerFormState.validate] manually to validate.
+  manual,
 
   /// Validate the form when the form is changed.
   onChange,
@@ -137,4 +171,32 @@ Widget defaultErrorWidget(String? error) {
     return const SizedBox.shrink();
   }
   return Text(error, style: const TextStyle(color: Colors.red));
+}
+
+/// A widget that rebuilds when the form data is changed.
+class FormDataChanged extends StatefulWidget {
+  final Widget? child;
+  final ValueWidgetBuilder<bool> builder;
+
+  const FormDataChanged({
+    super.key,
+    this.child,
+    required this.builder,
+  });
+
+  @override
+  State<FormDataChanged> createState() => _FormDataChangedState();
+}
+
+class _FormDataChangedState extends State<FormDataChanged> {
+  @override
+  Widget build(BuildContext context) {
+    final formScope = FormScope.of(context);
+    return StreamBuilder<bool>(
+      stream: formScope.state.dataChanged,
+      builder: (context, snapshot) {
+        return widget.builder(context, snapshot.data ?? false, widget.child);
+      },
+    );
+  }
 }
