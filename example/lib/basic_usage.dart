@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:power_form/power_form.dart';
 
@@ -73,7 +74,9 @@ class _BasicUsageState extends State<BasicUsage> {
     if (await formState.validate()) {
       formState.save();
       final values = formState.values;
-      print(values);
+      if (kDebugMode) {
+        print(values);
+      }
     }
   }
 }

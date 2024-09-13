@@ -34,7 +34,7 @@ class PowerForm extends StatefulWidget {
   State<PowerForm> createState() => PowerFormState();
 }
 
-class PowerFormState<T> extends State<PowerForm> {
+class PowerFormState extends State<PowerForm> {
   static PowerFormState of(BuildContext context) {
     final result = context.findAncestorStateOfType<PowerFormState>();
     if (result == null) {
@@ -56,6 +56,9 @@ class PowerFormState<T> extends State<PowerForm> {
   /// A stream that emits true when the form data is changed(not user interacted).
   /// This stream can be used to enable/disable the submit button.
   Stream<bool> get dataChanged => _dataChanged.stream;
+
+  // A flag to make sure all validators are triggered once to make the [dataValid] and [dataChanged] work correctly.
+  bool triggerAllValidatorOnce = false;
 
   String? getError(String fieldName) => _errors[fieldName];
 
@@ -133,7 +136,12 @@ class PowerFormState<T> extends State<PowerForm> {
         .add(!const DeepCollectionEquality().equals(values, resetValues));
     formItemStates[fieldName]?.rebuild();
     if (widget.validateMode == ValidateMode.onChange) {
-      validate([fieldName]);
+      if (triggerAllValidatorOnce) {
+        validate([fieldName]);
+      } else {
+        validate();
+        triggerAllValidatorOnce = true;
+      }
     }
   }
 
@@ -181,7 +189,8 @@ Widget defaultErrorWidget(String? error) {
   return Text(error, style: const TextStyle(color: Colors.red));
 }
 
-/// A widget that rebuilds when the form data is changed.
+/// A widget that rebuilds when the form data is changed & valid.
+/// This widget can be used to enable/disable the save button.
 class FormChange extends StatefulWidget {
   final Widget? child;
   final ValueWidgetBuilder<bool> builder;
@@ -200,12 +209,15 @@ class _FormChangeState extends State<FormChange> {
   @override
   Widget build(BuildContext context) {
     final formState = PowerFormState.of(context);
-    return StreamBuilder<bool>(
-      stream: formState.dataChanged,
-      builder: (context, snapshot) {
-        return widget.builder(context, snapshot.data ?? false, widget.child);
-      },
-    );
+    return FormValidity(builder: (context, valid, _) {
+      return StreamBuilder<bool>(
+        stream: formState.dataChanged,
+        builder: (context, snapshot) {
+          return widget.builder(
+              context, valid && (snapshot.data ?? false), widget.child);
+        },
+      );
+    });
   }
 }
 

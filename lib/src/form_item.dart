@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../power_form.dart';
-import 'form.dart';
 
 /// A form item that can be used to build form fields.
 class PowerFormItem<T> extends StatefulWidget {
