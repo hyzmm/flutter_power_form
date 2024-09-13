@@ -13,9 +13,10 @@ It is currently not published on pub.dev.
 1. No need to manage form state
 2. Validate form using `PowerFormFieldValidator`
 3. Support async validator
-4. Use `FormDataChanged` to listen to form data changes (Usually used to enable/disable submit button)
-5. Get form values to submit to create resource
-6. Get patch values to submit to update resource
+4. Use `FormChange` to listen to form data changes (Usually used to enable or disable the submit button in a modification form)
+5. Use `FormValidity` to listen to form validity changes (Usually used to enable or disable the submit button in a creation form)
+6. Get form values to submit to create resource
+7. Get patch values to submit to update resource
 
 ## Usage
 
@@ -38,7 +39,7 @@ PowerForm(
             PowerFormFieldValidator.minLength(3, "Username must be at least 3 characters"),
           ]),
           builder: (value, onChanged, extra) {
-            // 6. Return a widget 
+            // 6. Return a widget
             return TextFormField(
               // 7. Pass the value and onChanged to the widget
               initialValue: value,

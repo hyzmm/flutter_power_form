@@ -55,7 +55,7 @@ class _BasicUsageState extends State<BasicUsage> {
                       ],
                     );
                   }),
-              FormDataChanged(
+              FormChange(
                 builder: (context, changed, _) => FilledButton(
                   onPressed: changed ? submit : null,
                   child: const Text("Submit"),

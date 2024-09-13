@@ -39,18 +39,18 @@ class PowerFormItem<T> extends StatefulWidget {
 class PowerFormItemState<T> extends State<PowerFormItem<T>> {
   @override
   void deactivate() {
-    final formContext = FormScope.of(context);
-    formContext.state.removeFormItemState(widget.name);
+    final formContext = PowerFormState.of(context);
+    formContext.removeFormItemState(widget.name);
     super.deactivate();
   }
 
   @override
   Widget build(BuildContext context) {
-    final formContext = FormScope.of(context);
-    formContext.state.addFormItemState(this);
+    final formState = PowerFormState.of(context);
+    formState.addFormItemState(this);
 
-    final value = formContext.getFieldValue<T>(widget.name);
-    final error = formContext.state.getError(widget.name);
+    final value = formState.getFieldValue<T>(widget.name);
+    final error = formState.getError(widget.name);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -58,24 +58,25 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
           value,
           didChange,
           FormItemBuilderExtraArgs(
-            formState: formContext.state,
+            formState: formState,
             hasError: error != null,
           ),
         ),
-        Visibility(
-          visible: error != null,
-          child: FormHelperError(
-            errorText: error,
-            errorWidget: widget.errorWidget,
+        if (!formState.widget.hideError)
+          Visibility(
+            visible: error != null,
+            child: _FormHelperError(
+              errorText: error,
+              errorWidget: widget.errorWidget,
+            ),
           ),
-        ),
       ],
     );
   }
 
   void didChange(T value) {
-    final formContext = FormScope.of(context);
-    formContext.setFieldValue(widget.name, value);
+    final formState = PowerFormState.of(context);
+    formState.setFieldValue(widget.name, value);
   }
 
   void rebuild() {
@@ -97,12 +98,11 @@ class FormItemBuilderExtraArgs {
   });
 }
 
-class FormHelperError extends StatelessWidget {
+class _FormHelperError extends StatelessWidget {
   final String? errorText;
   final Widget Function(String? error)? errorWidget;
 
-  const FormHelperError({
-    super.key,
+  const _FormHelperError({
     this.errorText,
     this.errorWidget,
   });

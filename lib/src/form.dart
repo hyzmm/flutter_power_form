@@ -8,11 +8,16 @@ import 'package:power_form/src/form_item.dart';
 /// A form widget that holds the state of the form.
 class PowerForm extends StatefulWidget {
   final Widget child;
-  final Map<String, Object>? initialValues;
+  final Map<String, dynamic>? initialValues;
   final ValidateMode validateMode;
   final void Function(String fieldName, Object value)? onChanged;
   final VoidCallback? onReset;
   final Widget Function(String? error)? errorWidget;
+
+  /// If true, the error state will be hidden. It's useful when you don't want
+  /// to show the error message but still want to validate the form.
+  /// You can get the error state by calling [PowerFormState.getError].
+  final bool hideError;
 
   const PowerForm({
     super.key,
@@ -20,20 +25,33 @@ class PowerForm extends StatefulWidget {
     required this.child,
     this.onChanged,
     this.onReset,
-    this.validateMode = ValidateMode.manual,
+    this.validateMode = ValidateMode.onChange,
     this.errorWidget = defaultErrorWidget,
+    this.hideError = false,
   });
 
   @override
   State<PowerForm> createState() => PowerFormState();
 }
 
-class PowerFormState extends State<PowerForm> {
-  final Map<String, dynamic> values = {};
-  final Map<String, dynamic> resetValues = {};
+class PowerFormState<T> extends State<PowerForm> {
+  static PowerFormState of(BuildContext context) {
+    final result = context.findAncestorStateOfType<PowerFormState>();
+    if (result == null) {
+      throw Exception(
+          'PowerFormState not found, please make sure PowerForm is in the widget tree');
+    }
+    return result;
+  }
+
+  late Map<String, dynamic> values = {};
+  late Map<String, dynamic> resetValues = {};
   final Map<String, PowerFormItemState<dynamic>> formItemStates = {};
   final StreamController<bool> _dataChanged = StreamController.broadcast();
   final _errors = <String, String>{};
+
+  // Whether the form data is valid.
+  final ValueNotifier<bool> dataValid = ValueNotifier(false);
 
   /// A stream that emits true when the form data is changed(not user interacted).
   /// This stream can be used to enable/disable the submit button.
@@ -55,12 +73,13 @@ class PowerFormState extends State<PowerForm> {
   @override
   void dispose() {
     _dataChanged.close();
+    dataValid.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FormScope(state: this, child: widget.child);
+    return widget.child;
   }
 
   /// Validates the form
@@ -90,13 +109,16 @@ class PowerFormState extends State<PowerForm> {
       }
     }
 
-    final Set<String> keys = {..._errors.keys, ...oldErrors.keys};
-    for (final key in keys) {
-      if (_errors[key] != oldErrors[key]) {
-        formItemStates[key]!.rebuild();
+    if (!widget.hideError) {
+      final Set<String> keys = {..._errors.keys, ...oldErrors.keys};
+      for (final key in keys) {
+        if (_errors[key] != oldErrors[key]) {
+          formItemStates[key]!.rebuild();
+        }
       }
     }
 
+    dataValid.value = _errors.isEmpty;
     return _errors.isEmpty;
   }
 
@@ -152,38 +174,6 @@ enum ValidateMode {
   onChange,
 }
 
-class FormScope extends InheritedWidget {
-  final PowerFormState state;
-
-  const FormScope({super.key, required super.child, required this.state});
-
-  T? getFieldValue<T>(String fieldName) {
-    return state.getFieldValue(fieldName);
-  }
-
-  void setFieldValue<T>(String fieldName, T value) {
-    state.setFieldValue(fieldName, value);
-  }
-
-  @override
-  bool updateShouldNotify(FormScope oldWidget) {
-    return state != oldWidget.state;
-  }
-
-  static FormScope? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<FormScope>();
-  }
-
-  static FormScope of(BuildContext context) {
-    final result = context.dependOnInheritedWidgetOfExactType<FormScope>();
-    if (result == null) {
-      throw Exception(
-          'FormContext not found, please make sure PowerForm is in the widget tree');
-    }
-    return result;
-  }
-}
-
 Widget defaultErrorWidget(String? error) {
   if (error == null) {
     return const SizedBox.shrink();
@@ -192,28 +182,51 @@ Widget defaultErrorWidget(String? error) {
 }
 
 /// A widget that rebuilds when the form data is changed.
-class FormDataChanged extends StatefulWidget {
+class FormChange extends StatefulWidget {
   final Widget? child;
   final ValueWidgetBuilder<bool> builder;
 
-  const FormDataChanged({
+  const FormChange({
     super.key,
     this.child,
     required this.builder,
   });
 
   @override
-  State<FormDataChanged> createState() => _FormDataChangedState();
+  State<FormChange> createState() => _FormChangeState();
 }
 
-class _FormDataChangedState extends State<FormDataChanged> {
+class _FormChangeState extends State<FormChange> {
   @override
   Widget build(BuildContext context) {
-    final formScope = FormScope.of(context);
+    final formState = PowerFormState.of(context);
     return StreamBuilder<bool>(
-      stream: formScope.state.dataChanged,
+      stream: formState.dataChanged,
       builder: (context, snapshot) {
         return widget.builder(context, snapshot.data ?? false, widget.child);
+      },
+    );
+  }
+}
+
+class FormValidity extends StatelessWidget {
+  final Widget? child;
+  final ValueWidgetBuilder<bool> builder;
+
+  const FormValidity({
+    super.key,
+    this.child,
+    required this.builder,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final formState = PowerFormState.of(context);
+    return ValueListenableBuilder(
+      valueListenable: formState.dataValid,
+      child: child,
+      builder: (context, value, child) {
+        return builder(context, value, child);
       },
     );
   }

@@ -56,7 +56,7 @@ class _ReactiveDataChangedAndResetState
                     );
                   }),
               const SizedBox(height: 10),
-              FormDataChanged(
+              FormChange(
                   builder: (context, dataChanged, _) => FilledButton(
                       onPressed: dataChanged ? submit : null,
                       child: const Text("Submit"))),
