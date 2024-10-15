@@ -7,12 +7,14 @@ import 'package:power_form/src/form_item.dart';
 
 /// A form widget that holds the state of the form.
 class PowerForm extends StatefulWidget {
+  static Function(String error)? errorWidgetBuilder;
+
   final Widget child;
   final Map<String, dynamic>? initialValues;
   final ValidateMode validateMode;
   final void Function(String fieldName, Object value)? onChanged;
   final VoidCallback? onReset;
-  final Widget Function(String? error)? errorWidget;
+  final Widget Function(String error)? errorWidget;
 
   /// If true, the error state will be hidden. It's useful when you don't want
   /// to show the error message but still want to validate the form.
@@ -182,10 +184,7 @@ enum ValidateMode {
   onChange,
 }
 
-Widget defaultErrorWidget(String? error) {
-  if (error == null) {
-    return const SizedBox.shrink();
-  }
+Widget defaultErrorWidget(String error) {
   return Text(error, style: const TextStyle(color: Colors.red));
 }
 

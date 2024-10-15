@@ -61,14 +61,12 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
             hasError: error != null,
           ),
         ),
-        if (!formState.widget.hideError)
-          Visibility(
-            visible: error != null,
-            child: _FormHelperError(
-              errorText: error,
-              errorWidget: widget.errorWidget,
-            ),
+        if (!formState.widget.hideError &&  error != null)
+          _FormHelperError(
+            errorText: error!,
+            errorWidget: widget.errorWidget,
           ),
+
       ],
     );
   }
@@ -98,18 +96,17 @@ class FormItemBuilderExtraArgs {
 }
 
 class _FormHelperError extends StatelessWidget {
-  final String? errorText;
-  final Widget Function(String? error)? errorWidget;
+  final String errorText;
+  final Widget Function(String error)? errorWidget;
 
   const _FormHelperError({
-    this.errorText,
+    required this.errorText,
     this.errorWidget,
   });
 
   @override
   Widget build(BuildContext context) {
-    return errorWidget != null
-        ? errorWidget!(errorText)
-        : defaultErrorWidget(errorText);
+    return (errorWidget ?? PowerForm.errorWidgetBuilder ??
+        defaultErrorWidget)(errorText);
   }
 }
