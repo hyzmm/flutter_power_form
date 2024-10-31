@@ -9,6 +9,18 @@ import 'package:power_form/src/form_item.dart';
 class PowerForm extends StatefulWidget {
   static Function(String error)? errorWidgetBuilder;
 
+  static PowerFormState of(BuildContext context) {
+    final result = context.findAncestorStateOfType<PowerFormState>();
+    if (result == null) {
+      throw Exception('PowerFormState not found, please make sure PowerForm is in the widget tree');
+    }
+    return result;
+  }
+
+  static PowerFormState? maybeOf(BuildContext context) {
+    return context.findAncestorStateOfType<PowerFormState>();
+  }
+
   final Widget child;
   final Map<String, dynamic>? initialValues;
   final ValidateMode validateMode;
@@ -37,14 +49,6 @@ class PowerForm extends StatefulWidget {
 }
 
 class PowerFormState extends State<PowerForm> {
-  static PowerFormState of(BuildContext context) {
-    final result = context.findAncestorStateOfType<PowerFormState>();
-    if (result == null) {
-      throw Exception('PowerFormState not found, please make sure PowerForm is in the widget tree');
-    }
-    return result;
-  }
-
   late Map<String, dynamic> values = {};
   late Map<String, dynamic> resetValues = {};
   final Map<String, PowerFormItemState<dynamic>> formItemStates = {};
@@ -224,7 +228,7 @@ class FormChange extends StatefulWidget {
 class _FormChangeState extends State<FormChange> {
   @override
   Widget build(BuildContext context) {
-    final formState = PowerFormState.of(context);
+    final formState = PowerForm.of(context);
     return FormValidity(builder: (context, valid, _) {
       return StreamBuilder<bool>(
         stream: formState.dataChanged,
@@ -248,7 +252,7 @@ class FormValidity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formState = PowerFormState.of(context);
+    final formState = PowerForm.of(context);
     return ValueListenableBuilder(
       valueListenable: formState.dataValid,
       child: child,
@@ -277,7 +281,7 @@ class FormValueRetriever<T> extends StatefulWidget {
 class _FormValueRetrieverState<T> extends State<FormValueRetriever<T>> {
   @override
   Widget build(BuildContext context) {
-    final formState = PowerFormState.of(context);
+    final formState = PowerForm.of(context);
     formState._addValueRetriever(this);
 
     return widget.builder(context, formState.getFieldValue<T>(widget.fieldName));
@@ -285,7 +289,7 @@ class _FormValueRetrieverState<T> extends State<FormValueRetriever<T>> {
 
   @override
   void deactivate() {
-    PowerFormState.of(context)._removeValueRetriever(widget.fieldName);
+    PowerForm.of(context)._removeValueRetriever(widget.fieldName);
     super.deactivate();
   }
 }

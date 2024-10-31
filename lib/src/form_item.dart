@@ -8,8 +8,7 @@ import '../power_form.dart';
 class PowerFormItem<T> extends StatefulWidget {
   /// The name of the form item, corresponds to the field name in the data.
   final String name;
-  final Widget Function(
-      T? value, ValueChanged<T> onChanged, FormItemBuilderExtraArgs) builder;
+  final Widget Function(T? value, ValueChanged<T> onChanged, FormItemBuilderExtraArgs) builder;
 
   /// A validator function that can be used to validate the field.
   final PowerFormFieldValidatorCallback<T>? validator;
@@ -38,14 +37,16 @@ class PowerFormItem<T> extends StatefulWidget {
 class PowerFormItemState<T> extends State<PowerFormItem<T>> {
   @override
   void deactivate() {
-    final formContext = PowerFormState.of(context);
-    formContext.removeFormItemState(widget.name);
+    final formContext = PowerForm.maybeOf(context);
+    if (formContext != null) {
+      formContext.removeFormItemState(widget.name);
+    }
     super.deactivate();
   }
 
   @override
   Widget build(BuildContext context) {
-    final formState = PowerFormState.of(context);
+    final formState = PowerForm.of(context);
     formState.addFormItemState(this);
 
     final value = formState.getFieldValue<T>(widget.name);
@@ -71,7 +72,7 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
   }
 
   void didChange(T value) {
-    final formState = PowerFormState.of(context);
+    final formState = PowerForm.of(context);
     formState.setFieldValue(widget.name, value);
   }
 
@@ -105,8 +106,6 @@ class _FormHelperError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return (errorWidget ??
-        PowerForm.errorWidgetBuilder ??
-        defaultErrorWidget)(errorText);
+    return (errorWidget ?? PowerForm.errorWidgetBuilder ?? defaultErrorWidget)(errorText);
   }
 }
