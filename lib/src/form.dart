@@ -51,6 +51,7 @@ class PowerFormState extends State<PowerForm> {
   final Map<String, PowerFormItemState<dynamic>> formItemStates = {};
   final StreamController<bool> _dataChanged = StreamController.broadcast();
   final _errors = <String, String>{};
+  final Map<String, _FormValueRetrieverState> _valueRetrievers = {};
 
   // Whether the form data is valid.
   final ValueNotifier<bool> dataValid = ValueNotifier(false);
@@ -137,6 +138,7 @@ class PowerFormState extends State<PowerForm> {
     _dataChanged
         .add(!const DeepCollectionEquality().equals(values, resetValues));
     formItemStates[fieldName]?.rebuild();
+    _valueRetrievers[fieldName]?.setState(() {});
     if (widget.validateMode == ValidateMode.onChange) {
       if (triggerAllValidatorOnce) {
         validate([fieldName]);
@@ -153,6 +155,14 @@ class PowerFormState extends State<PowerForm> {
 
   void removeFormItemState(String name) {
     formItemStates.remove(name);
+  }
+
+  void _addValueRetriever(_FormValueRetrieverState valueRetriever) {
+    _valueRetrievers[valueRetriever.widget.fieldName] = valueRetriever;
+  }
+
+  void _removeValueRetriever(String fieldName) {
+    _valueRetrievers.remove(fieldName);
   }
 
   void save() {
@@ -240,5 +250,37 @@ class FormValidity extends StatelessWidget {
         return builder(context, value, child);
       },
     );
+  }
+}
+
+/// A widget that retrieves the value of a form field.
+class FormValueRetriever<T> extends StatefulWidget {
+  final String fieldName;
+  final Widget Function(BuildContext, T?) builder;
+
+  const FormValueRetriever({
+    super.key,
+    required this.fieldName,
+    required this.builder,
+  });
+
+  @override
+  State<FormValueRetriever<T>> createState() => _FormValueRetrieverState<T>();
+}
+
+class _FormValueRetrieverState<T> extends State<FormValueRetriever<T>> {
+  @override
+  Widget build(BuildContext context) {
+    final formState = PowerFormState.of(context);
+    formState._addValueRetriever(this);
+
+    return widget.builder(
+        context, formState.getFieldValue<T>(widget.fieldName));
+  }
+
+  @override
+  void deactivate() {
+    PowerFormState.of(context)._removeValueRetriever(widget.fieldName);
+    super.deactivate();
   }
 }

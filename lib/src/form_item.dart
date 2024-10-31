@@ -61,12 +61,11 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
             hasError: error != null,
           ),
         ),
-        if (!formState.widget.hideError &&  error != null)
+        if (!formState.widget.hideError && error != null)
           _FormHelperError(
-            errorText: error!,
+            errorText: error,
             errorWidget: widget.errorWidget,
           ),
-
       ],
     );
   }
@@ -106,7 +105,8 @@ class _FormHelperError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return (errorWidget ?? PowerForm.errorWidgetBuilder ??
+    return (errorWidget ??
+        PowerForm.errorWidgetBuilder ??
         defaultErrorWidget)(errorText);
   }
 }

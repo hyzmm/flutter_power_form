@@ -1,5 +1,6 @@
 import 'package:example/basic_usage.dart';
 import 'package:example/get_form_values.dart';
+import 'package:example/get_value_using_widget.dart';
 import 'package:example/reactive_data_changed.dart';
 import 'package:flutter/material.dart';
 
@@ -86,6 +87,10 @@ class _MyHomePageState extends State<MyHomePage> {
               OutlinedButton(
                 onPressed: () => _pushPage(const BasicUsage()),
                 child: const Text("Basic Usage"),
+              ),
+              OutlinedButton(
+                onPressed: () => _pushPage(const GetValueUsingWidget()),
+                child: const Text("Get Value Using Widget"),
               ),
               OutlinedButton(
                 onPressed: () => _pushPage(const AsyncValidation()),

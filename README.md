@@ -122,7 +122,7 @@ PowerFormItem<String>(
 )
 ```
 
-### Listen to form data changed
+## Listen to form data changed
 
 You can use `FormDataChanged` to listen for changes in the data, which means that the data has ultimately been modified. This is usually used to enable/disable the submit button:
 
@@ -152,3 +152,18 @@ final values = formKey.currentState!.getPatchValues();
 ```
 
 Patch data only contains the fields that have been modified. It corresponds to the `PATCH` method in RESTful API, which only updates the fields that have been modified.
+
+## Get value using Widget
+
+Sometimes you need to display something based on the form data, you can use `FormValueRetriever` to get the form field value:
+
+```dart
+FormValueRetriever<String>(
+  fieldName: "name",
+  builder: (context, value) {
+    return Text("Name: $value");
+  },
+)
+```
+
+See the [example](./example/lib/get_value_using_widget.dart) for more details.
