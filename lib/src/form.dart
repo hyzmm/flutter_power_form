@@ -40,8 +40,7 @@ class PowerFormState extends State<PowerForm> {
   static PowerFormState of(BuildContext context) {
     final result = context.findAncestorStateOfType<PowerFormState>();
     if (result == null) {
-      throw Exception(
-          'PowerFormState not found, please make sure PowerForm is in the widget tree');
+      throw Exception('PowerFormState not found, please make sure PowerForm is in the widget tree');
     }
     return result;
   }
@@ -135,8 +134,7 @@ class PowerFormState extends State<PowerForm> {
   void setFieldValue<T>(String fieldName, T value) {
     values[fieldName] = value as Object;
     widget.onChanged?.call(fieldName, value);
-    _dataChanged
-        .add(!const DeepCollectionEquality().equals(values, resetValues));
+    _dataChanged.add(!const DeepCollectionEquality().equals(values, resetValues));
     formItemStates[fieldName]?.rebuild();
     _valueRetrievers[fieldName]?.setState(() {});
     if (widget.validateMode == ValidateMode.onChange) {
@@ -181,6 +179,14 @@ class PowerFormState extends State<PowerForm> {
     widget.onReset?.call();
   }
 
+  void clearErrors() {
+    final errorKeys = _errors.keys.toList();
+    _errors.clear();
+    for (final key in errorKeys) {
+      formItemStates[key]!.rebuild();
+    }
+  }
+
   Map<String, dynamic> getPatchValues() {
     return diff(resetValues, values).cast();
   }
@@ -222,8 +228,7 @@ class _FormChangeState extends State<FormChange> {
       return StreamBuilder<bool>(
         stream: formState.dataChanged,
         builder: (context, snapshot) {
-          return widget.builder(
-              context, valid && (snapshot.data ?? false), widget.child);
+          return widget.builder(context, valid && (snapshot.data ?? false), widget.child);
         },
       );
     });
@@ -274,8 +279,7 @@ class _FormValueRetrieverState<T> extends State<FormValueRetriever<T>> {
     final formState = PowerFormState.of(context);
     formState._addValueRetriever(this);
 
-    return widget.builder(
-        context, formState.getFieldValue<T>(widget.fieldName));
+    return widget.builder(context, formState.getFieldValue<T>(widget.fieldName));
   }
 
   @override
