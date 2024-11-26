@@ -12,7 +12,7 @@ class PowerForm extends StatefulWidget {
   final Widget child;
   final Map<String, dynamic>? initialValues;
   final ValidateMode validateMode;
-  final void Function(String fieldName, Object value)? onChanged;
+  final void Function(String fieldName, Object? value)? onChanged;
   final VoidCallback? onReset;
   final Widget Function(String error)? errorWidget;
 
@@ -131,8 +131,12 @@ class PowerFormState extends State<PowerForm> {
     return values[fieldName] as T?;
   }
 
-  void setFieldValue<T>(String fieldName, T value) {
-    values[fieldName] = value as Object;
+  void setFieldValue<T>(String fieldName, T? value) {
+    if (value == null) {
+      values.remove(fieldName);
+    } else {
+      values[fieldName] = value as Object;
+    }
     widget.onChanged?.call(fieldName, value);
     _dataChanged.add(!const DeepCollectionEquality().equals(values, resetValues));
     formItemStates[fieldName]?.rebuild();
