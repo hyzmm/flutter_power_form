@@ -132,11 +132,8 @@ class PowerFormState extends State<PowerForm> {
   }
 
   void setFieldValue<T>(String fieldName, T? value) {
-    if (value == null) {
-      values.remove(fieldName);
-    } else {
-      values[fieldName] = value as Object;
-    }
+    values[fieldName] = value as Object?;
+
     widget.onChanged?.call(fieldName, value);
     _dataChanged.add(!const DeepCollectionEquality().equals(values, resetValues));
     formItemStates[fieldName]?.rebuild();
