@@ -77,7 +77,7 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
   }
 
   void rebuild() {
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   FutureOr<String?>? validate(T? value) {
