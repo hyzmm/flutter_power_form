@@ -54,7 +54,7 @@ class PowerFormState extends State<PowerForm> {
   final Map<String, PowerFormItemState<dynamic>> formItemStates = {};
   final StreamController<bool> _dataChanged = StreamController.broadcast();
   final _errors = <String, String>{};
-  final Map<String, _FormValueRetrieverState> _valueRetrievers = {};
+  final Map<String, Set<_FormValueRetrieverState>> _valueRetrievers = {};
 
   // Whether the form data is valid.
   final ValueNotifier<bool> dataValid = ValueNotifier(false);
@@ -83,6 +83,8 @@ class PowerFormState extends State<PowerForm> {
   void dispose() {
     _dataChanged.close();
     dataValid.dispose();
+    _valueRetrievers.clear();
+    formItemStates.clear();
     super.dispose();
   }
 
@@ -141,7 +143,7 @@ class PowerFormState extends State<PowerForm> {
     widget.onChanged?.call(fieldName, value);
     _dataChanged.add(!const DeepCollectionEquality().equals(values, resetValues));
     formItemStates[fieldName]?.rebuild();
-    _valueRetrievers[fieldName]?.setState(() {});
+    _valueRetrievers[fieldName]?.forEach((e) => e.rebuild());
     if (widget.validateMode == ValidateMode.onChange) {
       if (triggerAllValidatorOnce) {
         validate([fieldName]);
@@ -161,11 +163,14 @@ class PowerFormState extends State<PowerForm> {
   }
 
   void _addValueRetriever(_FormValueRetrieverState valueRetriever) {
-    _valueRetrievers[valueRetriever.widget.fieldName] = valueRetriever;
+    final list = _valueRetrievers[valueRetriever.widget.fieldName] ??= {};
+    list.add(valueRetriever);
   }
 
-  void _removeValueRetriever(String fieldName) {
-    _valueRetrievers.remove(fieldName);
+  void _removeValueRetriever(String fieldName, _FormValueRetrieverState state) {
+    if (_valueRetrievers.containsKey(fieldName)) {
+      _valueRetrievers[fieldName]!.remove(state);
+    }
   }
 
   void save() {
@@ -289,7 +294,13 @@ class _FormValueRetrieverState<T> extends State<FormValueRetriever<T>> {
 
   @override
   void deactivate() {
-    PowerForm.of(context)._removeValueRetriever(widget.fieldName);
+    PowerForm.of(context)._removeValueRetriever(widget.fieldName, this);
     super.deactivate();
+  }
+
+  void rebuild() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 }
