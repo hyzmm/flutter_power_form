@@ -8,8 +8,7 @@ import '../power_form.dart';
 class PowerFormItem<T> extends StatefulWidget {
   /// The name of the form item, corresponds to the field name in the data.
   final String name;
-  final Widget Function(
-      T? value, ValueChanged<T> onChanged, FormItemBuilderExtraArgs) builder;
+  final Widget Function(T? value, ValueChanged<T> onChanged, FormItemBuilderExtraArgs) builder;
 
   /// A validator function that can be used to validate the field.
   final PowerFormFieldValidatorCallback<T>? validator;
@@ -76,7 +75,7 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
   }
 
   void rebuild() {
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   FutureOr<String?>? validate(T? value) {
@@ -105,8 +104,6 @@ class _FormHelperError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return (errorWidget ??
-        PowerForm.errorWidgetBuilder ??
-        defaultErrorWidget)(errorText);
+    return (errorWidget ?? PowerForm.errorWidgetBuilder ?? defaultErrorWidget)(errorText);
   }
 }
