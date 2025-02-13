@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:ms_map_utils/ms_map_utils.dart';
 import 'package:power_form/src/form_item.dart';
+import 'package:power_form/src/form_retriever.dart';
 
 /// A form widget that holds the state of the form.
 class PowerForm extends StatefulWidget {
@@ -54,7 +55,7 @@ class PowerFormState extends State<PowerForm> {
   final Map<String, PowerFormItemState<dynamic>> formItemStates = {};
   final StreamController<bool> _dataChanged = StreamController.broadcast();
   final _errors = <String, String>{};
-  final Map<String, Set<_FormValueRetrieverState>> _valueRetrievers = {};
+  final Map<String, Set<FormValueRetrieverState>> _valueRetrievers = {};
 
   // Whether the form data is valid.
   final ValueNotifier<bool> dataValid = ValueNotifier(false);
@@ -162,12 +163,12 @@ class PowerFormState extends State<PowerForm> {
     formItemStates.remove(name);
   }
 
-  void _addValueRetriever(_FormValueRetrieverState valueRetriever) {
+  void addValueRetriever(FormValueRetrieverState valueRetriever) {
     final list = _valueRetrievers[valueRetriever.widget.fieldName] ??= {};
     list.add(valueRetriever);
   }
 
-  void _removeValueRetriever(String fieldName, _FormValueRetrieverState state) {
+  void removeValueRetriever(String fieldName, FormValueRetrieverState state) {
     if (_valueRetrievers.containsKey(fieldName)) {
       _valueRetrievers[fieldName]!.remove(state);
     }
@@ -212,95 +213,4 @@ enum ValidateMode {
 
 Widget defaultErrorWidget(String error) {
   return Text(error, style: const TextStyle(color: Colors.red));
-}
-
-/// A widget that rebuilds when the form data is changed & valid.
-/// This widget can be used to enable/disable the save button.
-class FormChange extends StatefulWidget {
-  final Widget? child;
-  final ValueWidgetBuilder<bool> builder;
-
-  const FormChange({
-    super.key,
-    this.child,
-    required this.builder,
-  });
-
-  @override
-  State<FormChange> createState() => _FormChangeState();
-}
-
-class _FormChangeState extends State<FormChange> {
-  @override
-  Widget build(BuildContext context) {
-    final formState = PowerForm.of(context);
-    return FormValidity(builder: (context, valid, _) {
-      return StreamBuilder<bool>(
-        stream: formState.dataChanged,
-        builder: (context, snapshot) {
-          return widget.builder(context, valid && (snapshot.data ?? false), widget.child);
-        },
-      );
-    });
-  }
-}
-
-class FormValidity extends StatelessWidget {
-  final Widget? child;
-  final ValueWidgetBuilder<bool> builder;
-
-  const FormValidity({
-    super.key,
-    this.child,
-    required this.builder,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final formState = PowerForm.of(context);
-    return ValueListenableBuilder(
-      valueListenable: formState.dataValid,
-      child: child,
-      builder: (context, value, child) {
-        return builder(context, value, child);
-      },
-    );
-  }
-}
-
-/// A widget that retrieves the value of a form field.
-class FormValueRetriever<T> extends StatefulWidget {
-  final String fieldName;
-  final Widget Function(BuildContext, T?) builder;
-
-  const FormValueRetriever({
-    super.key,
-    required this.fieldName,
-    required this.builder,
-  });
-
-  @override
-  State<FormValueRetriever<T>> createState() => _FormValueRetrieverState<T>();
-}
-
-class _FormValueRetrieverState<T> extends State<FormValueRetriever<T>> {
-  @override
-  Widget build(BuildContext context) {
-    final formState = PowerForm.of(context);
-    formState._addValueRetriever(this);
-
-    return widget.builder(context, formState.getFieldValue<T>(widget.fieldName));
-  }
-
-  @override
-  void deactivate() {
-    PowerForm.of(context)._removeValueRetriever(widget.fieldName, this);
-    super.deactivate();
-  }
-
-  void rebuild() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
 }

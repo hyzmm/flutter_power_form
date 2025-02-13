@@ -35,22 +35,19 @@ class PowerFormItem<T> extends StatefulWidget {
 }
 
 class PowerFormItemState<T> extends State<PowerFormItem<T>> {
+  PowerFormState? formState;
   @override
-  void deactivate() {
-    final formContext = PowerForm.maybeOf(context);
-    if (formContext != null) {
-      formContext.removeFormItemState(widget.name);
-    }
-    super.deactivate();
+  void dispose() {
+    formState?.removeFormItemState(widget.name);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final formState = PowerForm.of(context);
-    formState.addFormItemState(this);
+    formState ??= PowerForm.of(context)..addFormItemState(this);
 
-    final value = formState.getFieldValue<T>(widget.name);
-    final error = formState.getError(widget.name);
+    final value = formState!.getFieldValue<T>(widget.name);
+    final error = formState!.getError(widget.name);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -58,11 +55,11 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
           value,
           didChange,
           FormItemBuilderExtraArgs(
-            formState: formState,
+            formState: formState!,
             hasError: error != null,
           ),
         ),
-        if (!formState.widget.hideError && error != null)
+        if (!formState!.widget.hideError && error != null)
           _FormHelperError(
             errorText: error,
             errorWidget: widget.errorWidget,
