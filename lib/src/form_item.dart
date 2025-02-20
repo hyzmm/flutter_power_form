@@ -8,6 +8,7 @@ import '../power_form.dart';
 class PowerFormItem<T> extends StatefulWidget {
   /// The name of the form item, corresponds to the field name in the data.
   final String name;
+  final List<String> dependencies;
   final Widget Function(T? value, ValueChanged<T> onChanged, FormItemBuilderExtraArgs) builder;
 
   /// A validator function that can be used to validate the field.
@@ -23,7 +24,8 @@ class PowerFormItem<T> extends StatefulWidget {
 
   const PowerFormItem({
     super.key,
-    required this.name,
+    this.name = '',
+    this.dependencies = const [],
     this.validator,
     required this.builder,
     this.errorWidget,

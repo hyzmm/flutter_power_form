@@ -144,6 +144,7 @@ class PowerFormState extends State<PowerForm> {
     widget.onChanged?.call(fieldName, value);
     _dataChanged.add(!const DeepCollectionEquality().equals(values, resetValues));
     formItemStates[fieldName]?.rebuild();
+    _rebuildDependentFields(fieldName);
     _valueRetrievers[fieldName]?.forEach((e) => e.rebuild());
     if (widget.validateMode == ValidateMode.onChange) {
       if (triggerAllValidatorOnce) {
@@ -200,6 +201,14 @@ class PowerFormState extends State<PowerForm> {
 
   Map<String, dynamic> getPatchValues() {
     return diff(resetValues, values).cast();
+  }
+
+  _rebuildDependentFields(String fieldName) {
+    for (final formItemState in formItemStates.values) {
+      if (formItemState.widget.dependencies.contains(fieldName)) {
+        formItemState.rebuild();
+      }
+    }
   }
 }
 
