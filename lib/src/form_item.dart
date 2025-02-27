@@ -51,6 +51,7 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
     final value = formState!.getFieldValue<T>(widget.name);
     final error = formState!.getError(widget.name);
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         widget.builder(
