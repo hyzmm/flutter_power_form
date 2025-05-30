@@ -67,6 +67,9 @@ class PowerFormState extends State<PowerForm> {
   // A flag to make sure all validators are triggered once to make the [dataValid] and [dataChanged] work correctly.
   bool triggerAllValidatorOnce = false;
 
+  // Represents whether can valid when mode is onFocusChanged
+  bool canValidateOnFocusChanged = false;
+
   String? getError(String fieldName) => _errors[fieldName];
 
   @override
@@ -77,6 +80,10 @@ class PowerFormState extends State<PowerForm> {
     values
       ..clear()
       ..addAll(resetValues);
+
+    if (widget.validateMode == ValidateMode.onFocusChanged) {
+      WidgetsBinding.instance.focusManager.addListener(onFocusChanged);
+    }
     super.initState();
   }
 
@@ -86,7 +93,20 @@ class PowerFormState extends State<PowerForm> {
     dataValid.dispose();
     _valueRetrievers.clear();
     formItemStates.clear();
+    WidgetsBinding.instance.focusManager.removeListener(onFocusChanged);
     super.dispose();
+  }
+
+  onFocusChanged() {
+    if (canValidateOnFocusChanged) {
+      validate();
+    }
+
+    final itemState = primaryFocus?.context?.findAncestorStateOfType<PowerFormItemState>();
+    if (itemState != null) {
+      // If the focused item is a form item, we can validate when focus changes.
+      canValidateOnFocusChanged = true;
+    }
   }
 
   @override
@@ -218,6 +238,9 @@ enum ValidateMode {
 
   /// Validate the form when the form is changed.
   onChange,
+
+  /// Validate the form when the focus is changed.
+  onFocusChanged,
 }
 
 Widget defaultErrorWidget(String error) {
