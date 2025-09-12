@@ -13,7 +13,8 @@ class PowerForm extends StatefulWidget {
   static PowerFormState of(BuildContext context) {
     final result = context.findAncestorStateOfType<PowerFormState>();
     if (result == null) {
-      throw Exception('PowerFormState not found, please make sure PowerForm is in the widget tree');
+      throw Exception(
+          'PowerFormState not found, please make sure PowerForm is in the widget tree');
     }
     return result;
   }
@@ -102,7 +103,8 @@ class PowerFormState extends State<PowerForm> {
       validate();
     }
 
-    final itemState = primaryFocus?.context?.findAncestorStateOfType<PowerFormItemState>();
+    final itemState =
+        primaryFocus?.context?.findAncestorStateOfType<PowerFormItemState>();
     if (itemState != null) {
       // If the focused item is a form item, we can validate when focus changes.
       canValidateOnFocusChanged = true;
@@ -162,7 +164,8 @@ class PowerFormState extends State<PowerForm> {
     values[fieldName] = value as Object?;
 
     widget.onChanged?.call(fieldName, value);
-    _dataChanged.add(!const DeepCollectionEquality().equals(values, resetValues));
+    _dataChanged
+        .add(!const DeepCollectionEquality().equals(values, resetValues));
     formItemStates[fieldName]?.rebuild();
     _rebuildDependentFields(fieldName);
     _valueRetrievers[fieldName]?.forEach((e) => e.rebuild());
@@ -216,6 +219,14 @@ class PowerFormState extends State<PowerForm> {
     _errors.clear();
     for (final key in errorKeys) {
       formItemStates[key]!.rebuild();
+    }
+  }
+
+  /// 清除指定字段的错误（供扩展或外部使用）
+  void clearError(String name) {
+    if (_errors.containsKey(name)) {
+      _errors.remove(name);
+      formItemStates[name]?.rebuild();
     }
   }
 
