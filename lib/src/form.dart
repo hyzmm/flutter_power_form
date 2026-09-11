@@ -75,17 +75,23 @@ class PowerFormState extends State<PowerForm> {
 
   @override
   void initState() {
-    resetValues
-      ..clear()
-      ..addAll(widget.initialValues ?? {});
-    values
-      ..clear()
-      ..addAll(resetValues);
-
+    _setInitialValues(widget.initialValues);
+    validate();
     if (widget.validateMode == ValidateMode.onFocusChanged) {
       WidgetsBinding.instance.focusManager.addListener(onFocusChanged);
     }
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(PowerForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!const DeepCollectionEquality()
+        .equals(oldWidget.initialValues, widget.initialValues)) {
+      _setInitialValues(widget.initialValues);
+      _reloadValues();
+      validate();
+    }
   }
 
   @override
@@ -204,13 +210,27 @@ class PowerFormState extends State<PowerForm> {
     _dataChanged.add(false);
   }
 
-  void reset() {
-    values.clear();
-    values.addAll(resetValues);
+  void _setInitialValues(Map<String, dynamic>? initialValues) {
+    resetValues
+      ..clear()
+      ..addAll(initialValues ?? {});
+    values
+      ..clear()
+      ..addAll(resetValues);
+  }
+
+  void _reloadValues() {
+    values
+      ..clear()
+      ..addAll(resetValues);
     _dataChanged.add(false);
     for (final formItemState in formItemStates.values) {
       formItemState.rebuild();
     }
+  }
+
+  void reset() {
+    _reloadValues();
     widget.onReset?.call();
   }
 
