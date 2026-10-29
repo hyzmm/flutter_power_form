@@ -9,7 +9,8 @@ class PowerFormItem<T> extends StatefulWidget {
   /// The name of the form item, corresponds to the field name in the data.
   final String name;
   final List<String> dependencies;
-  final Widget Function(T? value, ValueChanged<T> onChanged, FormItemBuilderExtraArgs) builder;
+  final Widget Function(
+      T? value, ValueChanged<T> onChanged, FormItemBuilderExtraArgs) builder;
 
   /// A validator function that can be used to validate the field.
   final PowerFormFieldValidatorCallback<T>? validator;
@@ -38,6 +39,19 @@ class PowerFormItem<T> extends StatefulWidget {
 
 class PowerFormItemState<T> extends State<PowerFormItem<T>> {
   PowerFormState? formState;
+
+  @override
+  void didUpdateWidget(PowerFormItem<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.name != widget.name) {
+      // 元素被复用时只会更新 name，注册表里还挂着旧 name，之后按新 name
+      // 校验或清错都会查不到表单项（空断言）。这里按新 name 重新注册。
+      formState
+        ?..removeFormItemState(oldWidget.name)
+        ..addFormItemState(this);
+    }
+  }
+
   @override
   void dispose() {
     formState?.removeFormItemState(widget.name);
@@ -46,10 +60,10 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
 
   @override
   Widget build(BuildContext context) {
-    formState ??= PowerForm.of(context)..addFormItemState(this);
+    formState ??= PowerForm.maybeOf(context)?..addFormItemState(this);
 
-    final value = formState!.getFieldValue<T>(widget.name);
-    final error = formState!.getError(widget.name);
+    final value = formState?.getFieldValue<T>(widget.name);
+    final error = formState?.getError(widget.name);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +76,7 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
             hasError: error != null,
           ),
         ),
-        if (!formState!.widget.hideError && error != null)
+        if (formState != null && !formState!.widget.hideError && error != null)
           _FormHelperError(
             errorText: error,
             errorWidget: widget.errorWidget,
@@ -72,8 +86,8 @@ class PowerFormItemState<T> extends State<PowerFormItem<T>> {
   }
 
   void didChange(T value) {
-    final formState = PowerForm.of(context);
-    formState.setFieldValue(widget.name, value);
+    final formState = PowerForm.maybeOf(context);
+    formState?.setFieldValue(widget.name, value);
   }
 
   void rebuild() {
@@ -106,6 +120,8 @@ class _FormHelperError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return (errorWidget ?? PowerForm.errorWidgetBuilder ?? defaultErrorWidget)(errorText);
+    return (errorWidget ??
+        PowerForm.errorWidgetBuilder ??
+        defaultErrorWidget)(errorText);
   }
 }

@@ -41,19 +41,21 @@ class _BasicUsageState extends State<BasicUsage> {
               PowerFormItem<Gender>(
                   name: "gender",
                   builder: (value, onChanged, extra) {
-                    return Column(
-                      children: [
-                        RadioListTile<Gender>(
+                    return RadioGroup<Gender>(
+                      groupValue: value,
+                      onChanged: (v) => onChanged(v ?? value ?? Gender.male),
+                      child: const Column(
+                        children: [
+                          RadioListTile<Gender>(
                             value: Gender.male,
-                            groupValue: value,
-                            onChanged: (v) => onChanged(v!),
-                            title: const Text("Male")),
-                        RadioListTile<Gender>(
+                            title: Text("Male"),
+                          ),
+                          RadioListTile<Gender>(
                             value: Gender.female,
-                            groupValue: value,
-                            onChanged: (v) => onChanged(v!),
-                            title: const Text("Female")),
-                      ],
+                            title: Text("Female"),
+                          ),
+                        ],
+                      ),
                     );
                   }),
               FormChange(

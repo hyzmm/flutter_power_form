@@ -104,7 +104,7 @@ class PowerFormState extends State<PowerForm> {
     super.dispose();
   }
 
-  onFocusChanged() {
+  void onFocusChanged() {
     if (canValidateOnFocusChanged) {
       validate();
     }
@@ -153,7 +153,7 @@ class PowerFormState extends State<PowerForm> {
       final Set<String> keys = {..._errors.keys, ...oldErrors.keys};
       for (final key in keys) {
         if (_errors[key] != oldErrors[key]) {
-          formItemStates[key]!.rebuild();
+          formItemStates[key]?.rebuild();
         }
       }
     }
@@ -191,6 +191,10 @@ class PowerFormState extends State<PowerForm> {
 
   void removeFormItemState(String name) {
     formItemStates.remove(name);
+    // 表单项卸载或改名后，它的错误已经找不到对应的表单项可以重建。
+    // 保留下来会让 clearErrors()/validate() 按 name 查表时空断言，
+    // 也会让 validate() 因为残留错误而一直返回 false。
+    _errors.remove(name);
   }
 
   void addValueRetriever(FormValueRetrieverState valueRetriever) {
@@ -238,7 +242,7 @@ class PowerFormState extends State<PowerForm> {
     final errorKeys = _errors.keys.toList();
     _errors.clear();
     for (final key in errorKeys) {
-      formItemStates[key]!.rebuild();
+      formItemStates[key]?.rebuild();
     }
   }
 
@@ -254,7 +258,7 @@ class PowerFormState extends State<PowerForm> {
     return diff(resetValues, values).cast();
   }
 
-  _rebuildDependentFields(String fieldName) {
+  void _rebuildDependentFields(String fieldName) {
     for (final formItemState in formItemStates.values) {
       if (formItemState.widget.dependencies.contains(fieldName)) {
         formItemState.rebuild();
